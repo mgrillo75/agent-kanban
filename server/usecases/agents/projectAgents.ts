@@ -7,7 +7,7 @@ import {
   grantDefaultAgentPermissions,
 } from "./defaultPermissions";
 
-const AGENT_KANBAN_SKILL = "saltbo/agent-kanban@agent-kanban";
+const AGENT_KANBAN_SKILL = "saltbo/agent-kanban@ak-worker";
 
 export interface CreateAgencyAgentInput {
   name: string;

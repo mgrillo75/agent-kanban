@@ -29,7 +29,7 @@ const input = {
   systemPrompt: "Build reliable APIs",
   provider: "openai",
   model: "gpt-5.6",
-  skills: ["agent-kanban"],
+  skills: ["example/custom-skill"],
   idempotencyKey: "agent-create-key",
 };
 
@@ -91,7 +91,7 @@ describe("Agent SDK orchestration", () => {
           systemPrompt: "Build reliable APIs",
           provider: "openai",
           model: "gpt-5.6",
-          skills: ["agent-kanban", "saltbo/agent-kanban@agent-kanban"],
+          skills: ["example/custom-skill", "saltbo/agent-kanban@ak-worker"],
           identityRef: "identity-1",
         },
       },

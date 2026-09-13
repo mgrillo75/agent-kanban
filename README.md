@@ -172,9 +172,10 @@ roles:
 
 | Skill | Purpose |
 | --- | --- |
-| [`agent-kanban`](./skills/agent-kanban/SKILL.md) | Execute an assigned Task from an Enbor Session. |
-| [`ak-task`](./skills/ak-task/SKILL.md) | Create, assign, monitor, and review one Task. |
-| [`ak-plan`](./skills/ak-plan/SKILL.md) | Plan and execute a multi-Task project. |
+| [`ak-worker`](./skills/ak-worker/SKILL.md) | Execute an assigned Task from an Agency Session; automatic invocation allowed. |
+| [`ak-maintainer`](./skills/ak-maintainer/SKILL.md) | Proactively plan, coordinate, and review multi-Task work within an authorized project. |
+| [`ak-task`](./skills/ak-task/SKILL.md) | Create, assign, monitor, and review one Task; explicit user invocation required. |
+| [`ak-plan`](./skills/ak-plan/SKILL.md) | Plan and execute a multi-Task project; explicit user invocation required. |
 
 ## Architecture
 

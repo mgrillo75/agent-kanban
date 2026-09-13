@@ -78,20 +78,20 @@ describe("Agent Skills Discovery artifacts", () => {
       await mkdir(path.join(fixtureRoot, "scripts"), { recursive: true });
       await cp(path.join(root, "scripts", "build-agent-skills.mjs"), path.join(fixtureRoot, "scripts", "build-agent-skills.mjs"));
       await cp(skillsRoot, path.join(fixtureRoot, "skills"), { recursive: true });
-      const reference = path.join(fixtureRoot, "skills", "agent-kanban", "references", "toolbox.md");
+      const reference = path.join(fixtureRoot, "skills", "ak-worker", "references", "toolbox.md");
       await mkdir(path.dirname(reference), { recursive: true });
       await writeFile(reference, "initial instructions\n");
 
       const script = path.join(fixtureRoot, "scripts", "build-agent-skills.mjs");
       execFileSync(process.execPath, [script]);
-      const archive = await readFile(path.join(fixtureRoot, "public", ".well-known", "agent-skills", "agent-kanban.tar.gz"));
+      const archive = await readFile(path.join(fixtureRoot, "public", ".well-known", "agent-skills", "ak-worker.tar.gz"));
       expect(readTarFiles(archive).get("references/toolbox.md")?.toString()).toBe("initial instructions\n");
 
       await writeFile(reference, "changed instructions\n");
       const check = spawnSync(process.execPath, [script, "--check"], { encoding: "utf8" });
 
       expect(check.status).not.toBe(0);
-      expect(check.stderr).toContain("agent-kanban.tar.gz is stale. Run pnpm run build:skills.");
+      expect(check.stderr).toContain("ak-worker.tar.gz is stale. Run pnpm run build:skills.");
     } finally {
       await rm(fixtureRoot, { recursive: true, force: true });
     }

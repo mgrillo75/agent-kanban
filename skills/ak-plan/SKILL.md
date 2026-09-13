@@ -1,15 +1,9 @@
 ---
 name: ak-plan
-description: Plan and execute a multi-Task project through Agent Kanban v2 resources and Realmroot Toolbox. Use only when the user explicitly asks for AK Plan, an Agent Kanban project plan, or execution of a project through an AK board.
+description: Plan and execute a multi-Task project through Agent Kanban resources and Realmroot Toolbox. Use only when the user explicitly asks for AK Plan, an Agent Kanban project plan, or execution of a project through an AK board.
 ---
 
-# AK Plan v2
-
-Model the project as Boards, Tasks, dependencies, Repositories, and Claims.
-Assignment and review outcomes are Task fields and status transitions. Realmroot grants provide authority;
-there are no Agent role classes, maintainer, mailbox, handoff-routing, or
-AK-owned Agent/Machine runtime entities. AK exposes Agency-backed Agent and
-Machine projections as product resources.
+# AK Plan
 
 ## Plan before creating
 
@@ -32,25 +26,22 @@ acceptance checks.
 
 ## Create resources
 
-Use Toolbox's generic verb-first operations. Create a Board or Repository only
-when it does not already exist:
+Create a Board or Repository only when it does not already exist:
 
 ```bash
 realmroot toolbox post agent-kanban/boards --content-type application/json @board.json --json
 realmroot toolbox post agent-kanban/repositories --content-type application/json @repository.json --json
 ```
 
-Discover executable Agents through AK's Agency-backed projection and select
-only an Agent that currently reports `schedulable: true`:
+Select an available Agent that reports `schedulable: true`:
 
 ```bash
 realmroot toolbox get 'agent-kanban/agents?schedulable=true' --json
 ```
 
-Use the selected Agent's `subject` as the Assignment actor ID. If no suitable
+Use the selected Agent's `subject` as `assignedTo`. If no suitable
 Agent exists and the caller is authorized to provision one, create it through
-AK's generic `/agents` collection operation; AK owns the Identity-plus-Agent
-orchestration. Do not call Agency directly or create an AK-local Agent row.
+`agent-kanban/agents`.
 
 For each approved work item, create an unassigned Task, then patch its
 `assignedTo` field:
@@ -62,14 +53,14 @@ realmroot toolbox patch agent-kanban/tasks/<task-id> \
   '{"assignedTo":"<realmroot-agent-actor-id>"}' --json
 ```
 
-Realmroot Toolbox v0.5.0 or newer generates the required idempotency key and
+Realmroot Toolbox generates the required idempotency key and
 reuses it across transient retries of this invocation. Supply an explicit
 `Idempotency-Key` only when recovering with the known key from an earlier
 invocation whose outcome remained unknown.
 
 Encode real prerequisites in `dependsOn`. Tasks with overlapping files or
 contracts should be combined or ordered; only independent Tasks should run in
-parallel. Do not create AK-local Agent, Machine, Session, or subagent rows.
+parallel.
 
 ## Execute and review
 
@@ -80,20 +71,26 @@ stop. Use bounded waits with continuation cursors:
 realmroot toolbox agent-kanban task wait <task-id> in-review --wait-seconds 25 --json
 ```
 
-As Tasks reach review, follow the review procedure in the installed `ak-task`
-skill: read the current Task, verify the work, then patch it to
-`in-progress` with a reason or to `done` from a different verified actor. A
-rejection creates another work iteration and a new Task representation.
+When the Task reaches `in-review`, verify the submitted work, then reread the
+Task before making the review decision:
 
-When one prerequisite completes, continue monitoring its dependents. Agency
-owns Agent execution; AK only exposes the updated dependency and Task state.
+```bash
+realmroot toolbox get agent-kanban/tasks/<task-id> --include --json
+
+realmroot toolbox patch agent-kanban/tasks/<task-id> \
+  --content-type application/merge-patch+json \
+  '{"status":"in-progress","statusReason":"Describe the required correction"}' --json
+
+realmroot toolbox patch agent-kanban/tasks/<task-id> \
+  --content-type application/merge-patch+json \
+  '{"status":"done"}' --json
+```
+
+Reject when acceptance evidence or implementation is insufficient, then wait
+for a new `in-review` Task state. Complete only after the requested outcome is
+proven. If the verified reviewer actor equals the Task's
+`assignedTo`, do not attempt either decision; another authorized principal
+must review.
+
+When one prerequisite completes, reassess its dependent Tasks.
 Report the final Task states, review outcomes, and unresolved external blockers.
-
-Ordinary published resource operations use generic verbs. Toolbox generates
-the required idempotency key for Task, Task Note, Agent, and Machine creation
-and reuses it across transient retries. Board and Repository creation do not
-require the header. Board labels and destructive management remain
-browser-owned in this release.
-Only bounded Task Event waiting retains the generated resource-first `task
-wait` command. All Task and Claim writes use generic Toolbox verbs. Never
-invoke the removed `ak` CLI or removed lifecycle aliases.

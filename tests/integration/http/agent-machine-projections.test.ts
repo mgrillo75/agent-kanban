@@ -743,7 +743,7 @@ describe("Agent and Machine projection HTTP resources", () => {
               systemPrompt: "Handle concurrent work",
               provider: null,
               model: null,
-              skills: ["saltbo/agent-kanban@agent-kanban"],
+              skills: ["saltbo/agent-kanban@ak-worker"],
               allowedTools: [],
               identity: { agentId: "realmroot-concurrent", subject: "agent-concurrent-subject", username: "concurrent-agent", runtime: "codex" },
             },
